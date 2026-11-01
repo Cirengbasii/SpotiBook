@@ -1,0 +1,29 @@
+.gradle/
+.kotlin/
+local.properties
+**/build/
+*.jks
+*.keystore
+.idea/
+captures/
+
+# Local configuration and signing credentials
+.env
+.env.*
+!.env.example
+keystore.properties
+signing.properties
+
+# Android Studio and native build cache
+*.iml
+.externalNativeBuild/
+.cxx/
+
+# Distribute installable builds separately from source
+*.apk
+*.aab
+*.apks
+
+# Operating system files
+.DS_Store
+Thumbs.db
