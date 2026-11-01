@@ -6,11 +6,13 @@ Aplikasi ini berjalan offline, tanpa akun, iklan, atau sinkronisasi cloud. Antar
 
 ## Download dan instal
 
-**[Download Spotibook 1.4.0 untuk Android (.apk)](https://github.com/Cirengbasii/SpotiBook/releases/download/v1.4.0-preview.1/Spotibook-1.4.0-preview.apk)** · [Halaman rilis](https://github.com/Cirengbasii/SpotiBook/releases/tag/v1.4.0-preview.1)
+**[Lihat rilis dan download APK Android](https://github.com/Cirengbasii/SpotiBook/releases)**
+
+Unduh file `.apk` dari bagian **Assets** pada rilis yang sudah dipublikasikan. Jika belum ada rilis atau lampiran APK, file instalasi belum tersedia. Draft versi percobaan 1.4.0 sudah disiapkan; APK masih menunggu unggahan selesai.
 
 Minimum Android 9. APK ini adalah build debug untuk percobaan; perilaku pada HP, termasuk widget dan alarm saat layar mati, belum diuji langsung.
 
-1. Download file APK lewat link di atas dari HP Android.
+1. Buka halaman rilis lewat link di atas dari HP Android, lalu download file APK yang dilampirkan.
 2. Buka file yang sudah selesai diunduh. Jika diminta, izinkan **Instal aplikasi tidak dikenal / Izinkan dari sumber ini** untuk browser atau pengelola file yang digunakan, lalu lanjutkan instalasi.
 3. Buka **Spotibook**, masuk ke **Pustaka**, lalu tekan **+** untuk mengimpor buku sendiri.
 
