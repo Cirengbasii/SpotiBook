@@ -110,7 +110,7 @@ Periksa perubahan sebelum commit. Ganti pesan contoh dengan perubahan sebenarnya
 
 Folder build dan file APK dikecualikan dari source. Untuk membagikan aplikasi siap pasang, unggah APK yang sudah ditandatangani sebagai lampiran GitHub Release. APK debug bisa dipakai mencoba aplikasi, sedangkan `app-release-unsigned.apk` perlu ditandatangani lebih dulu. Jangan unggah keystore bersama APK.
 
-Draft **Spotibook 1.4.0 — Preview** sudah disiapkan, tetapi unggahan APK belum berhasil. Buka [halaman Releases](https://github.com/Cirengbasii/SpotiBook/releases) sambil login sebagai pemilik repo, edit draft tersebut, lampirkan APK, lalu publikasikan. File siap pasang yang tersedia di komputer adalah `app/build/outputs/apk/debug/app-debug.apk`; boleh disalin dan diberi nama `Spotibook-1.4.0-preview.apk` sebelum dilampirkan. Hapus kalimat status menunggu unggahan di README setelah rilis tersedia.
+**Spotibook 1.4.0 — Preview** sudah dipublikasikan di [halaman Releases](https://github.com/Cirengbasii/SpotiBook/releases/tag/v1.4.0-preview.1), dengan lampiran `Spotibook-1.4.0-preview.apk`. Link download dan petunjuk instal tersedia di README. File sumber APK lokalnya adalah `app/build/outputs/apk/debug/app-debug.apk`.
 
 Untuk versi berikutnya:
 

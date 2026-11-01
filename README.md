@@ -4,15 +4,26 @@ Spotibook adalah aplikasi Android untuk baca ebook dan mencatat kebiasaan membac
 
 Aplikasi ini berjalan offline, tanpa akun, iklan, atau sinkronisasi cloud. Antarmukanya berbahasa Indonesia.
 
+## Tampilan aplikasi
+
+| Beranda | Rak buku | Kalender membaca |
+| --- | --- | --- |
+| <img src="docs/screenshots/beranda.png" alt="Beranda dengan buku terakhir dibaca dan progres target harian" width="220"> | <img src="docs/screenshots/rak-buku.png" alt="Rak Teknologi dengan tiga buku dan rata-rata progres membaca" width="220"> | <img src="docs/screenshots/kalender.png" alt="Kalender yang menampilkan sampul buku pada tanggal membaca" width="220"> |
+| Lanjutkan buku terakhir dan cek target hari ini. | Kelompokkan buku berdasarkan topik atau kebutuhan. | Lihat buku yang dibaca pada tiap tanggal. |
+
+**[Lihat galeri dan penjelasan fitur](docs/SCREENSHOTS.md)** — termasuk Pustaka, isi rak, mode baca, PDF landscape, dan widget.
+
+Screenshot berasal dari pengujian UI dengan data contoh. Buku pada gambar tidak disertakan dalam aplikasi.
+
 ## Download dan instal
 
-**[Lihat rilis dan download APK Android](https://github.com/Cirengbasii/SpotiBook/releases)**
+**[Download Spotibook 1.4.0 untuk Android (.apk)](https://github.com/Cirengbasii/SpotiBook/releases/download/v1.4.0-preview.1/Spotibook-1.4.0-preview.apk)** · [Lihat semua rilis](https://github.com/Cirengbasii/SpotiBook/releases)
 
-Unduh file `.apk` dari bagian **Assets** pada rilis yang sudah dipublikasikan. Jika belum ada rilis atau lampiran APK, file instalasi belum tersedia. Draft versi percobaan 1.4.0 sudah disiapkan; APK masih menunggu unggahan selesai.
+Versi percobaan 1.4.0 sudah tersedia. Gunakan link download di atas, atau pilih file `.apk` dari bagian **Assets** pada halaman rilis.
 
 Minimum Android 9. APK ini adalah build debug untuk percobaan; perilaku pada HP, termasuk widget dan alarm saat layar mati, belum diuji langsung.
 
-1. Buka halaman rilis lewat link di atas dari HP Android, lalu download file APK yang dilampirkan.
+1. Download file APK lewat link di atas dari HP Android.
 2. Buka file yang sudah selesai diunduh. Jika diminta, izinkan **Instal aplikasi tidak dikenal / Izinkan dari sumber ini** untuk browser atau pengelola file yang digunakan, lalu lanjutkan instalasi.
 3. Buka **Spotibook**, masuk ke **Pustaka**, lalu tekan **+** untuk mengimpor buku sendiri.
 
@@ -103,6 +114,10 @@ app/
   src/androidTest/  Pengujian pada perangkat atau emulator
   schemas/          Skema database Room untuk migrasi
 gradle/wrapper/     Gradle Wrapper
+docs/
+  SCREENSHOTS.md    Galeri tampilan dan penjelasan fitur
+  screenshots/      Gambar yang ditampilkan di dokumentasi
+  PUBLISHING.md     Panduan upload source dan APK ke GitHub
 build.gradle.kts    Versi plugin build
 settings.gradle.kts
 VALIDATION.md       Catatan hasil pengujian dan hal yang perlu dicek di perangkat
