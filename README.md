@@ -4,6 +4,20 @@ Spotibook adalah aplikasi Android untuk baca ebook dan mencatat kebiasaan membac
 
 Aplikasi ini berjalan offline, tanpa akun, iklan, atau sinkronisasi cloud. Antarmukanya berbahasa Indonesia.
 
+## Download dan instal
+
+**[Download Spotibook 1.4.0 untuk Android (.apk)](https://github.com/Cirengbasii/SpotiBook/releases/download/v1.4.0-preview.1/Spotibook-1.4.0-preview.apk)** · [Halaman rilis](https://github.com/Cirengbasii/SpotiBook/releases/tag/v1.4.0-preview.1)
+
+Minimum Android 9. APK ini adalah build debug untuk percobaan; perilaku pada HP, termasuk widget dan alarm saat layar mati, belum diuji langsung.
+
+1. Download file APK lewat link di atas dari HP Android.
+2. Buka file yang sudah selesai diunduh. Jika diminta, izinkan **Instal aplikasi tidak dikenal / Izinkan dari sumber ini** untuk browser atau pengelola file yang digunakan, lalu lanjutkan instalasi.
+3. Buka **Spotibook**, masuk ke **Pustaka**, lalu tekan **+** untuk mengimpor buku sendiri.
+
+Di halaman rilis, pilih file berakhiran `.apk` pada bagian **Assets**. File **Source code** berisi kode project untuk pengembangan, bukan aplikasi siap pasang.
+
+Kalau pembaruan gagal karena tanda tangan instalasi lama berbeda, buat backup dari **Profil** dengan **Sertakan berkas buku** sebelum mengganti instalasi. Menghapus aplikasi akan menghapus data lokalnya.
+
 ## Fitur
 
 - **Pustaka dan rak buku.** Impor beberapa file sekaligus, cari judul, urutkan buku, tandai status baca, dan masukkan buku ke satu atau beberapa rak. Ada pemindai PDF dan EPUB di penyimpanan perangkat.

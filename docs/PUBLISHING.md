@@ -109,3 +109,15 @@ Periksa perubahan sebelum commit. Ganti pesan contoh dengan perubahan sebenarnya
 ## Membagikan APK
 
 Folder build dan file APK dikecualikan dari source. Untuk membagikan aplikasi siap pasang, unggah APK yang sudah ditandatangani sebagai lampiran GitHub Release. APK debug bisa dipakai mencoba aplikasi, sedangkan `app-release-unsigned.apk` perlu ditandatangani lebih dulu. Jangan unggah keystore bersama APK.
+
+Versi percobaan saat ini ada di [Spotibook 1.4.0 preview](https://github.com/Cirengbasii/SpotiBook/releases/tag/v1.4.0-preview.1), dengan aset `Spotibook-1.4.0-preview.apk`. Link download dan petunjuk instal ada di bagian awal README.
+
+Untuk versi berikutnya:
+
+1. Build dan periksa APK yang akan dibagikan. Gunakan kunci penandatanganan yang sama agar pengguna bisa memperbarui tanpa menghapus aplikasi.
+2. Push kode yang sesuai ke GitHub. Buka repo → **Releases** → **Draft a new release**.
+3. Buat tag baru sesuai versi, pilih commit atau branch yang sesuai, lalu isi judul dan catatan perubahan.
+4. Lampirkan file `.apk`. Centang **This is a pre-release** untuk versi percobaan. Siapkan lampiran sebelum menekan **Publish release**.
+5. Perbarui link download di README ke tag dan nama aset yang baru, lalu commit dan push README.
+
+Langkah pembuatan rilis mengikuti [panduan GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).
