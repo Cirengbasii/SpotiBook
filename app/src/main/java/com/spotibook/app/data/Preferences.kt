@@ -29,7 +29,8 @@ private val Context.settingsStore by preferencesDataStore("spotibook_settings")
 /** Normalize retired choices at the persistence boundary, including restored backups. */
 fun Settings.normalized() = copy(
     readerTheme = if (readerTheme == "Black") "Dark" else readerTheme,
-    accent = if (accent == "Forest") "Ocean" else accent
+    accent = if (accent == "Forest") "Ocean" else accent,
+    pageTurn = if (pageTurn == PageTurn.Scroll) PageTurn.Scrolling else pageTurn
 )
 
 @Serializable data class FocusState(val id: String = "", val bookId: String? = null, val plannedMillis: Long = 0,

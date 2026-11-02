@@ -12,7 +12,7 @@ import com.spotibook.app.R
 import com.spotibook.app.data.Settings
 
 val ReadingGold = Color(0xFFF3C64B)
-val ReadingCoral = Color(0xFFDF6A51)
+val ReadingCoral = Color(0xFFFF6659)
 
 // Bundled under the SIL Open Font License; no font download at runtime.
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
@@ -55,7 +55,9 @@ private fun text(size: Int, line: Int, weight: FontWeight = FontWeight.Normal) =
         surfaceContainerLow = Color(0xFFFFF9EF), surfaceContainer = Color(0xFFF1E8DA),
         surfaceContainerHigh = Color(0xFFECE2D3), surfaceContainerHighest = Color(0xFFE5DAC9)
     )
-    MaterialTheme(colorScheme = palette, shapes = Shapes(
+    val coralPalette = if(dark) palette.copy(primary=Color(0xFFFFA397),onPrimary=Color(0xFF491A19),primaryContainer=Color(0xFF59302D),onPrimaryContainer=Color(0xFFFFDAD4),background=Color(0xFF151923),onBackground=Color(0xFFF5F1F3),surface=Color(0xFF202532),onSurface=Color(0xFFF5F1F3),surfaceVariant=Color(0xFF303543),onSurfaceVariant=Color(0xFFC7C5CF),surfaceContainerLow=Color(0xFF1C202B),surfaceContainer=Color(0xFF272C38),surfaceContainerHigh=Color(0xFF303543),surfaceContainerHighest=Color(0xFF3B404E),outlineVariant=Color(0xFF404553))
+    else palette.copy(primary=Color(0xFFB93832),onPrimary=Color.White,primaryContainer=Color(0xFFFFEDE7),onPrimaryContainer=Color(0xFF852E29),background=Color(0xFFFFFCFB),onBackground=Color(0xFF121D3C),surface=Color.White,onSurface=Color(0xFF121D3C),surfaceVariant=Color(0xFFF3F1F2),onSurfaceVariant=Color(0xFF606779),surfaceContainerLow=Color(0xFFFFF6F2),surfaceContainer=Color(0xFFF9EEEB),surfaceContainerHigh=Color(0xFFF3E6E2),surfaceContainerHighest=Color(0xFFEADBD7),outlineVariant=Color(0xFFE9DFDC))
+    MaterialTheme(colorScheme = coralPalette, shapes = Shapes(
         extraSmall = RoundedCornerShape(8.dp), small = RoundedCornerShape(12.dp),
         medium = RoundedCornerShape(20.dp), large = RoundedCornerShape(26.dp), extraLarge = RoundedCornerShape(32.dp)
     ), typography = Typography(

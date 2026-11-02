@@ -39,7 +39,7 @@ object FocusAudio {
             if(settings.focusSound=="Custom"&&file(context).isFile){
                 val media=MediaPlayer()
                 try{
-                    media.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                    media.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
                     media.setDataSource(file(context).absolutePath);media.isLooping=false;media.setVolume(settings.focusVolume,settings.focusVolume)
                     withTimeoutOrNull(8000){suspendCancellableCoroutine<Unit>{cont->
                         media.setOnCompletionListener{if(cont.isActive)cont.resume(Unit)}
@@ -49,7 +49,7 @@ object FocusAudio {
                     }}
                 }finally{media.release()}
             }else{
-                val tone=ToneGenerator(AudioManager.STREAM_NOTIFICATION,(settings.focusVolume*100).toInt().coerceIn(0,100))
+                val tone=ToneGenerator(AudioManager.STREAM_ALARM,(settings.focusVolume*100).toInt().coerceIn(0,100))
                 try{tone.startTone(ToneGenerator.TONE_PROP_ACK,400);delay(600)}finally{tone.release()}
             }
         }catch(e:CancellationException){throw e}catch(_:Exception){/* A missing/unsupported sound must not prevent the completion notification. */}

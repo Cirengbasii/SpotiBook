@@ -37,11 +37,11 @@ class PdfModesDeviceTest {
                 compose.waitUntil(15_000) { compose.onAllNodesWithContentDescription("Halaman $number").fetchSemanticsNodes().isNotEmpty() }
             }
             awaitPage(2)
-            for(mode in PageTurn.entries) {
+            for(mode in PageTurn.available) {
                 compose.runOnIdle { settings=settings.copy(pageTurn=mode) }
                 compose.waitForIdle();assertEquals("Changing mode must preserve page",1,page)
                 awaitPage(2)
-                if(mode==PageTurn.Scroll||mode==PageTurn.Scrolling) compose.onRoot().performTouchInput { swipeUp() }
+                if(mode==PageTurn.Scrolling) compose.onRoot().performTouchInput { swipeUp() }
                 else compose.onRoot().performTouchInput { swipeLeft() }
                 if(mode==PageTurn.Scrolling)compose.waitUntil(15_000){page>1||offset>.05f}
                 else compose.waitUntil(15_000) { page==2 }
@@ -79,7 +79,7 @@ class PdfModesDeviceTest {
             assertEquals(0xfff1e5cb.toInt(),sepia.getPixel(0,0)); assertArrayEquals(original,file.readBytes())
             light.recycle();sepia.recycle()
             compose.setContent { SpotibookTheme(settings) { PdfReader(document,book.copy(position=page,offset=offset),jump,command,zoomState,settings,{p,f->page=p;offset=f},{},{},{errors+=it}) } }
-            for(mode in PageTurn.entries) {
+            for(mode in PageTurn.available) {
                 compose.runOnIdle { zoom=1f;settings=settings.copy(pageTurn=mode);jump=1 to 0f;command++ }
                 compose.waitForIdle()
                 compose.waitUntil(15_000) { compose.onAllNodesWithContentDescription("Halaman 2").fetchSemanticsNodes().isNotEmpty() }

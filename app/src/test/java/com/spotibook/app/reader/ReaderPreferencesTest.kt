@@ -1,18 +1,24 @@
 package com.spotibook.app.reader
 
 import com.spotibook.app.data.Settings
+import com.spotibook.app.data.normalized
 import kotlinx.serialization.json.Json
 import org.junit.Assert.*
 import org.junit.Test
 
 class ReaderPreferencesTest {
+    @Test fun retiredScrollMigratesWithoutLosingPreferences(){
+        val old=Json.decodeFromString<Settings>("""{"pageTurn":"Scroll","fontSize":24}""").normalized()
+        assertEquals(PageTurn.Scrolling,old.pageTurn);assertEquals(24,old.fontSize)
+        assertFalse(PageTurn.available.contains(PageTurn.Scroll));assertTrue(PageTurn.available.contains(PageTurn.HorizontalScrolling))
+    }
     @Test fun oldPreferencesLoadWithoutChangingReadingData() {
         val restored=Json.decodeFromString<Settings>("""{"fontSize":22,"brightness":0.4,"dailyMinutes":45}""")
         assertEquals(22,restored.fontSize);assertEquals(45,restored.dailyMinutes)
         assertEquals(PageTurn.Scrolling,restored.pageTurn);assertEquals(ReaderOrientation.Auto,restored.readerOrientation)
     }
     @Test fun readerPreferencesRoundTripEveryModeAndOrientation() {
-        for(mode in PageTurn.entries) for(orientation in ReaderOrientation.entries) {
+        for(mode in PageTurn.available) for(orientation in ReaderOrientation.entries) {
             val value=Settings(pageTurn=mode,readerOrientation=orientation,pdfFit=PdfFit.Page,readerTheme="Dark",pdfMargin=12,volumeKeys=true,tapToTurn=true,keepScreenOn=false)
             assertEquals(value,Json.decodeFromString<Settings>(Json.encodeToString(value)))
         }

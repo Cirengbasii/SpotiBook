@@ -50,18 +50,21 @@ import java.time.LocalDate
         if (target in listOf("home", "library", "focus", "statistics", "settings") || target.matches(Regex("reader/[0-9a-fA-F-]{36}")) || (target.startsWith("calendar?day=") && runCatching { LocalDate.parse(target.removePrefix("calendar?day=")) }.isSuccess)) nav.navigate(target) { launchSingleTop = true }
     } }
     val reader = route.startsWith("reader")
+    val speech by com.spotibook.app.speech.SpeechService.state.collectAsStateWithLifecycle()
+    var speechPanel by remember { mutableStateOf(false) }
     val wide = LocalConfiguration.current.screenWidthDp >= 840
     val destinations = listOf(Triple("home","Beranda",Icons.Outlined.Home),Triple("library","Pustaka",Icons.Outlined.AutoStories),Triple("focus","Fokus",Icons.Outlined.Timelapse),Triple("statistics","Statistik",Icons.Outlined.BarChart),Triple("settings","Profil",Icons.Outlined.PersonOutline))
     fun select(path: String) { nav.navigate(path) { popUpTo(nav.graph.startDestinationId) { saveState=true }; launchSingleTop=true; restoreState=path!="home" } }
+    Box(Modifier.fillMaxSize()) {
     Scaffold(containerColor = MaterialTheme.colorScheme.background, snackbarHost = { SnackbarHost(snackbar) },
         contentWindowInsets=if(reader) WindowInsets(0,0,0,0) else WindowInsets.safeDrawing,
         bottomBar = { if (!reader && !wide) SpotibookBottomBar(destinations, route, ::select) }
 
     ) { padding ->
-        Row(Modifier.fillMaxSize().padding(padding)) {
+        Row(Modifier.fillMaxSize().padding(padding).padding(bottom=if(speech.bookId.isNotEmpty()&&!reader)80.dp else 0.dp)) {
         if(wide&&!reader) NavigationRail(containerColor=MaterialTheme.colorScheme.background) { destinations.forEach { (path,label,icon)->NavigationRailItem(route==path,{select(path)},icon={Icon(icon,label)},label={Text(label)}) } }
         NavHost(nav, startDestination = "home", modifier = Modifier.weight(1f).fillMaxHeight()) {
-            composable("home") { HomeScreen(model, ::open, ::importBooks, { target -> if(destinations.any{it.first==target})select(target)else nav.navigate(target) }) }
+            composable("home") { Box(Modifier.fillMaxSize(),contentAlignment=Alignment.TopCenter){Box(Modifier.widthIn(max=840.dp).fillMaxHeight()){HomeScreen(model, ::open, ::importBooks, { target -> if(destinations.any{it.first==target})select(target)else nav.navigate(target) })}} }
             composable("library") { LibraryScreen(model, ::open, ::importBooks) }
             composable("focus") { FocusScreen(model, ::open, ::permission) }
             composable("statistics") { StatisticsScreen(model, { nav.navigate(it) }) }
@@ -72,6 +75,12 @@ import java.time.LocalDate
         }
         }
     }
+    FocusCompletionBanner(model)
+    if(speech.bookId.isNotEmpty()&&!reader)Surface(onClick={speechPanel=true},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=110.dp,start=16.dp,end=16.dp).widthIn(max=560.dp).fillMaxWidth(),shape=MaterialTheme.shapes.large,color=MaterialTheme.colorScheme.primaryContainer,shadowElevation=4.dp){
+        Row(Modifier.padding(12.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Headphones,null);Text(speech.title.ifBlank{"Dengarkan buku"},Modifier.weight(1f).padding(horizontal=10.dp),maxLines=1);IconButton({com.spotibook.app.speech.SpeechService.command(model.app,if(speech.playing)"PAUSE"else"PLAY")}){Icon(if(speech.playing)Icons.Outlined.Pause else Icons.Outlined.PlayArrow,if(speech.playing)"Jeda suara"else"Lanjutkan suara")}}
+    }
+    }
+    if(speechPanel)SpeechSheet(model,speech.bookId,speech.page){speechPanel=false}
     if (busy != null) AlertDialog(onDismissRequest = {}, title = { Text("Spotibook") }, text = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) { CircularProgressIndicator(Modifier.size(24.dp)); Text(busy!!) } }, confirmButton = {})
     if (exportChoice) AlertDialog(onDismissRequest = { exportChoice = false }, title = { Text("Cadangkan pustaka") }, text = { Column {
         Text("Cadangan ZIP berisi pustaka, riwayat, koleksi, catatan, dan pengaturan. Sertakan berkas buku agar bisa dibaca setelah dipulihkan di perangkat lain.")

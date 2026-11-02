@@ -101,8 +101,8 @@ fun dateLabel(epoch: Long): String = Instant.ofEpochMilli(epoch).atZone(ZoneId.s
             destinations.forEach { (path, label, icon) ->
                 val picked = route == path
                 Column(Modifier.weight(1f).selectable(picked, role = Role.Tab, onClick = { select(path) }).padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Box(Modifier.size(50.dp).background(if (picked) MaterialTheme.colorScheme.primary else Color.Transparent, CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(icon, null, Modifier.size(27.dp), tint = if (picked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                    Box(Modifier.size(50.dp), contentAlignment = Alignment.Center) {
+                        Icon(icon, null, Modifier.size(27.dp), tint = if (picked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, color = if (picked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                 }

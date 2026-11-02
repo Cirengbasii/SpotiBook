@@ -96,7 +96,7 @@ import java.util.Locale
             TextButton({model.task{FocusAudio.play(model.app,prefs)}},enabled=prefs.focusSound!="Silent"){Text("Coba bunyi")}
             TextButton({model.task{FocusAudio.stop()}}){Text("Hentikan bunyi")}
         }
-        Text("Bunyi diputar sekali, maksimal 8 detik. Mode senyap dan Jangan Ganggu tetap dihormati.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Bunyi memakai volume alarm HP, diputar sekali, maksimal 8 detik. Mode senyap dan Jangan Ganggu tetap dihormati.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
         if(Build.VERSION.SDK_INT>=31&&!exact){
             OutlinedButton({alarmPermission.launch(Intent(AndroidSettings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:${model.app.packageName}")))},Modifier.fillMaxWidth()){Text("Izinkan alarm tepat waktu")}
             Text("Agar penanda selesai tetap tepat saat layar mati.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)

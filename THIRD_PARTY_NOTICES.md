@@ -1,5 +1,7 @@
 # Third-party notices
 
+PDFBox-Android 2.0.27.0 (Tom Roush / Apache PDFBox) is used for offline PDF text extraction under the Apache License 2.0. Project and notices: https://github.com/TomRoush/PdfBox-Android . Transitive components retain their bundled license notices.
+
 Spotibook uses AndroidX libraries (including Compose, Room, DataStore, WorkManager, Navigation, WebKit and Glance), Kotlin and kotlinx under the Apache License 2.0. License: https://www.apache.org/licenses/LICENSE-2.0
 
 jsoup is distributed under the MIT License:

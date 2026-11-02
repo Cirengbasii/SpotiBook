@@ -26,7 +26,7 @@ import com.spotibook.app.reader.*
         Text("Bahasa aplikasi · Bahasa Indonesia", style=MaterialTheme.typography.bodyMedium, color=MaterialTheme.colorScheme.onSurfaceVariant)
         SectionTitle("Tampilan")
         Choices("Tema aplikasi", listOf("System", "Light", "Dark"), settings.appearance) { value -> model.preferences { it.copy(appearance = value) } }
-        Choices("Warna aksen", listOf("Ocean", "Olive", "Amber"), settings.accent) { value -> model.preferences { it.copy(accent = value) } }
+        Text("Palet Coral · warna menyesuaikan tema terang dan gelap",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
         HorizontalDivider(); SectionTitle("Preferensi membaca")
         ThemeSwatches(settings.readerTheme) { value -> model.preferences { it.copy(readerTheme=value) } }
         Text("Perpindahan halaman PDF",style=MaterialTheme.typography.titleMedium)

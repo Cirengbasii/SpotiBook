@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit
 
 class FocusTimer(private val context:Context,private val repo:Repository,private val scope:CoroutineScope,private val tracker:SessionTracker){
     private val gate=Mutex();private var ticking:Job?=null
+    @Volatile private var delivery:Job?=null
+    suspend fun awaitAlert(){delivery?.join()}
     private val alarms get()=context.getSystemService(AlarmManager::class.java)
     private fun boot()=Settings.Global.getInt(context.contentResolver,Settings.Global.BOOT_COUNT,-1)
     fun remaining(state:FocusState):Long=if(state.running&&state.boot==boot())(state.deadlineElapsed-SystemClock.elapsedRealtime()).coerceAtLeast(0)else state.remainingMillis
@@ -38,7 +40,7 @@ class FocusTimer(private val context:Context,private val repo:Repository,private
             val left=remaining(s)
             if(left==0L)finish(s)else{tracker.focusBoundary("");repo.preferences.setFocus(s.copy(running=false,remainingMillis=left));cancel(s.id);false}
         }
-        if(finished)alert()
+        if(finished)delivery=scope.launch { alert() }
     }
     suspend fun resume()=gate.withLock{
         val s=repo.preferences.focus.first();if(s.done||s.remainingMillis<=0||s.running)return@withLock
@@ -55,7 +57,7 @@ class FocusTimer(private val context:Context,private val repo:Repository,private
             else if(remaining(s)==0L)finish(s)
             else{schedule(s);false}
         }
-        if(completed)alert()
+        if(completed)delivery=scope.launch { alert() }
     }
     private suspend fun finish(s:FocusState):Boolean{
         if(s.done||s.id.isEmpty())return false
@@ -70,9 +72,10 @@ class FocusTimer(private val context:Context,private val repo:Repository,private
         val prefs=repo.preferences.settings.first()
         if(prefs.focusNotification&&Notifications.allowed(context)){
             Notifications.show(context,101,"focus_complete","Sesi fokus selesai","Waktunya beristirahat. Waktu membaca Anda sudah tercatat saat buku terbuka.","focus")
-            val channel=context.getSystemService(android.app.NotificationManager::class.java).getNotificationChannel("focus_complete")
-            if(channel?.importance!=android.app.NotificationManager.IMPORTANCE_NONE)FocusAudio.play(context,prefs)
+
         }
+        // In-app sound is independent of Android notification permission.
+        FocusAudio.play(context,prefs)
         Widgets.update(context)
     }
     private fun cancel(id:String){ticking?.cancel();ticking=null;alarms.cancel(pending(id));WorkManager.getInstance(context).cancelUniqueWork("focus-timer")}
@@ -90,9 +93,9 @@ class FocusTimer(private val context:Context,private val repo:Repository,private
 class FocusAlarmReceiver:BroadcastReceiver(){
     override fun onReceive(context:Context,intent:Intent){
         val result=goAsync();val app=context.applicationContext as SpotibookApp
-        app.scope.launch{try{app.focus.recover(intent.getStringExtra("focusId"))}finally{result.finish()}}
+        app.scope.launch{try{app.focus.recover(intent.getStringExtra("focusId"));app.focus.awaitAlert()}finally{result.finish()}}
     }
 }
 class FocusWorker(context:Context,params:WorkerParameters):CoroutineWorker(context,params){
-    override suspend fun doWork():Result{(applicationContext as SpotibookApp).focus.recover();return Result.success()}
+    override suspend fun doWork():Result{val focus=(applicationContext as SpotibookApp).focus;focus.recover();focus.awaitAlert();return Result.success()}
 }

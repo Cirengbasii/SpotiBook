@@ -32,7 +32,7 @@ internal fun zoomPan(old: Float, new: Float, x: Float, pan: Float, oldPan: Float
 internal fun panLimit(zoom:Float,width:Float,paperWidth:Float):Float = if(zoom<=1f)0f else ((paperWidth*zoom-width)/2).coerceAtLeast(0f)+width/2*((zoom-1).coerceAtMost(1f))
 internal fun blankPanLimit(zoom:Float,height:Float):Float = height/2*((zoom-1).coerceIn(0f,1f))
 
-private class PdfZoomState(zoom: MutableFloatState, val scroll: ScrollableState) {
+private class PdfZoomState(zoom: MutableFloatState, val scroll: ScrollableState, val horizontal: ScrollableState?) {
     var scale by zoom
     var panX by mutableFloatStateOf(0f)
     var panY by mutableFloatStateOf(0f)
@@ -57,7 +57,13 @@ private class PdfZoomState(zoom: MutableFloatState, val scroll: ScrollableState)
         val target = next.coerceIn(1f, 5f)
         if (target != scale) awaitingLayout = true
         pending += zoomScrollDelta(scale, target, center.y-panY, pan.y, height, pageExtent)
-        panX = zoomPan(scale, target, center.x, pan.x, panX, width, paperWidth)
+        if(horizontal==null) panX = zoomPan(scale, target, center.x, pan.x, panX, width, paperWidth)
+        else {
+            var delta=(center.x-width/2-panX)*(1/scale-1/target)-pan.x/target
+            if(panX*delta>0){val restore=kotlin.math.sign(delta)*minOf(abs(delta),abs(panX)/target);panX-=restore*target;delta-=restore}
+            val remaining=delta-horizontal.dispatchRawDelta(delta)
+            panX=(panX-remaining*target).coerceIn(-blankPanLimit(target,width),blankPanLimit(target,width))
+        }
         scale = target
         consumePending()
         if (!awaitingLayout) revealBlank()
@@ -86,9 +92,10 @@ internal fun PdfZoomViewport(
     zoom: MutableFloatState, scroll: ScrollableState,
     paperWidth: Float, pageExtent: Float? = null, active: Boolean = true,
     interaction: (Boolean) -> Unit, tap: (Float) -> Unit,
+    horizontal: ScrollableState? = null,
     content: @Composable (Dp, Boolean) -> Unit
 ) {
-    val state = remember(scroll, zoom) { PdfZoomState(zoom, scroll) }
+    val state = remember(scroll, zoom, horizontal) { PdfZoomState(zoom, scroll, horizontal) }
     val scope = rememberCoroutineScope()
     val fling = ScrollableDefaults.flingBehavior()
     val latestInteraction by rememberUpdatedState(interaction)
@@ -96,8 +103,10 @@ internal fun PdfZoomViewport(
     fun animateZoom(target: Float, center: Offset) {
         state.animation?.cancel()
         state.animation = scope.launch {
-            scroll.stopScroll()
-            AnimationState(state.scale).animateTo(target, tween(220)) { state.transform(value, center) }
+            scroll.stopScroll(); horizontal?.stopScroll()
+            latestInteraction(true)
+            try { AnimationState(state.scale).animateTo(target, tween(220)) { state.transform(value, center) } }
+            finally { latestInteraction(false) }
         }
     }
     BoxWithConstraints(Modifier.fillMaxSize().clipToBounds().testTag(if (active) "pdf-viewport" else "pdf-viewport-inactive")) {
@@ -112,7 +121,7 @@ internal fun PdfZoomViewport(
             awaitEachGesture {
                 awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                 state.animation?.cancel()
-                scope.launch { scroll.stopScroll() }
+                scope.launch { scroll.stopScroll();horizontal?.stopScroll() }
                 var owned = false
                 var multi = false
                 var traveled = Offset.Zero
@@ -143,6 +152,8 @@ internal fun PdfZoomViewport(
                 if (owned) {
                     if (!multi && kotlin.math.abs(state.panY)<.5f) {
                         val speed = -velocity.calculateVelocity().y / state.scale
+                        val horizontalSpeed=-velocity.calculateVelocity().x/state.scale
+                        if(horizontal!=null && abs(horizontalSpeed)>100f) scope.launch { horizontal.scroll { with(fling) { performFling(horizontalSpeed) } } }
                         if (abs(speed) > 100f) scope.launch { scroll.scroll { with(fling) { performFling(speed) } } }
                     }
                 }
@@ -153,7 +164,7 @@ internal fun PdfZoomViewport(
             })
         }.semantics {
             stateDescription = "Pembesaran ${(state.scale * 100).toInt()} persen"
-            contentDescription = if(state.panY>1f)"Ruang di atas halaman ${state.panY.toInt()} piksel"else"Area baca PDF"
+            contentDescription = if(state.panY>1f)"Ruang di atas halaman ${state.panY.toInt()} piksel"else if(state.panY< -1f)"Ruang di bawah halaman ${(-state.panY).toInt()} piksel"else"Area baca PDF"
             customActions = listOf(
                 CustomAccessibilityAction("Perbesar") { animateZoom((state.scale + .5f).coerceAtMost(5f), Offset(widthPx/2, heightPx/2)); true },
                 CustomAccessibilityAction("Perkecil") { animateZoom((state.scale - .5f).coerceAtLeast(1f), Offset(widthPx/2, heightPx/2)); true }

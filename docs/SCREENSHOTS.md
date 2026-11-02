@@ -2,6 +2,14 @@
 
 [Kembali ke README](../README.md)
 
+## Update 1.6.0 — Coral dan mode gelap
+
+| Terang | Gelap |
+| --- | --- |
+| <img src="screenshots/coral-terang.png" width="280" alt="Coral terang"> | <img src="screenshots/coral-gelap.png" width="280" alt="Coral gelap"> |
+
+Pilih tema lewat Profil → Tema aplikasi. Untuk suara Indonesia offline, buka buku dan tekan ikon headphone. Semua gambar memakai data pengujian. Galeri di bawah mendokumentasikan fitur yang sudah ada; beberapa gambar masih menampilkan palet versi sebelumnya.
+
 Spotibook punya lima halaman utama: **Beranda, Pustaka, Fokus, Statistik, dan Profil**. Galeri ini memperlihatkan beberapa tampilan yang sudah tersedia dari pengujian UI, disertai cara menggunakannya.
 
 Semua gambar memakai data contoh dari pengujian, bukan data pengguna atau buku bawaan aplikasi. Gambar dibuat lewat pengujian UI di komputer, bukan tangkapan layar HP. Contoh halaman PDF memakai renderer fixture pengujian; hasil render dokumen asli perlu diperiksa pada perangkat.

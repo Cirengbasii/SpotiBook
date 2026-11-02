@@ -47,6 +47,7 @@ import java.util.UUID
     var jump by remember { mutableStateOf<Pair<Int, Float>?>(null) }
     var anchor by remember { mutableStateOf<String?>(null) }
     var focusSheet by remember { mutableStateOf(false) }
+    var speechSheet by remember { mutableStateOf(false) }
     var panel by remember { mutableStateOf<ReaderPanelPage?>(null) }
     var addNote by remember { mutableStateOf(false) }
     var selection by remember { mutableStateOf<TextSelection?>(null) }
@@ -137,6 +138,7 @@ import java.util.UUID
                     val bookmark=annotations.firstOrNull { it.kind=="Bookmark"&&it.position==page }
                     IconButton({if(bookmark==null){annotate("Bookmark");announce("Penanda ditambahkan")}else model.task{model.repo.dao.deleteAnnotation(bookmark.id)}},enabled=ready) { Icon(if(bookmark==null) Icons.Outlined.BookmarkBorder else Icons.Outlined.Bookmark,if(bookmark==null) "Tambahkan penanda" else "Hapus penanda") }
                     IconButton({focusSheet=true},enabled=ready){Icon(Icons.Outlined.Timelapse,"Fokus membaca")}
+                    IconButton({speechSheet=true},enabled=ready){Icon(Icons.Outlined.Headphones,"Dengarkan buku")}
                     if(isPdf&&landscape) {
                         IconButton({zoom=(zoom-.5f).coerceAtLeast(1f)},enabled=ready&&zoom>1f){Icon(Icons.Outlined.ZoomOut,"Perkecil PDF")}
                         IconButton({zoom=(zoom+.5f).coerceAtMost(5f)},enabled=ready&&zoom<5f){Icon(Icons.Outlined.ZoomIn,"Perbesar PDF")}
@@ -165,6 +167,7 @@ import java.util.UUID
         AlertDialog(onDismissRequest={addNote=false;selection=null},title={Text("Tulis catatan")},text={Column(verticalArrangement=Arrangement.spacedBy(12.dp)){selection?.let{Text(it.text.take(240),style=MaterialTheme.typography.bodySmall)};OutlinedTextField(note,{note=it},label={Text("Catatan")},minLines=3)}},confirmButton={TextButton({annotate("Note",note.trim(),selection);addNote=false;selection=null},enabled=note.isNotBlank()&&note.length<=20_000){Text("Simpan")}},dismissButton={TextButton({addNote=false;selection=null}){Text("Batal")}})
     }
     if(focusSheet&&ready)ReaderFocusSheet(model,id){focusSheet=false}
+    if(speechSheet&&ready)SpeechSheet(model,id,page){speechSheet=false}
     panel?.takeIf{ready}?.let { start -> ReaderPanel(start,book!!,page,settings,publication,annotations,model::preferences,
         {brightnessPreview=it},{index,fraction,fragment->go(index,fraction,fragment);panel=null},{panel=null;addNote=true},
         {note->model.task{model.repo.dao.deleteAnnotation(note.id)}},

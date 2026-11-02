@@ -52,6 +52,9 @@ class ReaderRotationUiTest {
         compose.waitUntil(15_000){compose.onAllNodesWithText("Jeda").fetchSemanticsNodes().isNotEmpty()}
         compose.onNodeWithContentDescription("Tutup Fokus").performClick()
         compose.waitUntil(5_000){compose.onAllNodesWithContentDescription("Tutup Fokus").fetchSemanticsNodes().isEmpty()}
+        compose.onNodeWithContentDescription("Dengarkan buku").performClick()
+        compose.onNodeWithText("Bahasa Indonesia · suara offline perangkat").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Tutup pemutar").performClick()
         runBlocking {
             val focus=model.repo.preferences.focus.first()
             assertTrue(focus.running);assertEquals(id,focus.bookId);assertEquals(600_000L,focus.plannedMillis)

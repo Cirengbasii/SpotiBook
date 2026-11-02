@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.spotibook.app.captureScreen
 import com.spotibook.app.data.Book
@@ -44,11 +45,11 @@ class PdfModesUiTest {
                 compose.waitUntil(15_000) { compose.onAllNodesWithContentDescription("Halaman $number").fetchSemanticsNodes().isNotEmpty() }
             }
             awaitPage(2)
-            for(mode in PageTurn.entries) {
+            for(mode in PageTurn.available) {
                 compose.runOnIdle { settings=settings.copy(pageTurn=mode) }
                 compose.waitForIdle();assertEquals("Changing mode must preserve page",1,page)
                 awaitPage(2)
-                if(mode==PageTurn.Scroll||mode==PageTurn.Scrolling) compose.onRoot().performTouchInput { swipeUp() }
+                if(mode==PageTurn.Scrolling) compose.onRoot().performTouchInput { swipeUp() }
                 else compose.onRoot().performTouchInput { swipeLeft() }
                 if(mode==PageTurn.Scrolling)compose.waitUntil(15_000){page>1||offset>.05f}
                 else compose.waitUntil(15_000) { page==2 }
@@ -91,7 +92,7 @@ class PdfModesUiTest {
             assertEquals(0xfff1e5cb.toInt(),sepia.getPixel(0,0)); assertArrayEquals(original,file.readBytes())
             light.recycle();sepia.recycle()
             compose.setContent { SpotibookTheme(settings) { PdfReader(document,book.copy(position=page,offset=offset),jump,command,zoomState,settings,{p,f->page=p;offset=f},{},{},{errors+=it}) } }
-            for(mode in PageTurn.entries) {
+            for(mode in PageTurn.available) {
                 compose.runOnIdle { zoom=1f;settings=settings.copy(pageTurn=mode);jump=1 to 0f;command++ }
                 compose.waitForIdle()
                 compose.waitUntil(15_000) { compose.onAllNodesWithContentDescription("Halaman 2").fetchSemanticsNodes().isNotEmpty() }
@@ -103,10 +104,12 @@ class PdfModesUiTest {
                 }
                 compose.waitForIdle()
                 compose.runOnIdle { assertTrue("$mode must respond to pinch: $zoom",zoom>1.8f);assertEquals("$mode pinch must not turn pages",1,page) }
+                compose.waitUntil(15000){compose.onAllNodesWithTag("pdf-horizontal-ready").fetchSemanticsNodes().isNotEmpty()}
                 val before=offset
                 compose.onNodeWithTag("pdf-viewport").performTouchInput { swipe(center,center+androidx.compose.ui.geometry.Offset(30f,-60f),400) }
                 compose.waitForIdle()
-                compose.runOnIdle { assertEquals("$mode pan must stay on this page",1,page);assertTrue("$mode vertical pan must move the document ($before -> $offset)",offset>before+.01f) }
+                val blankBottom=compose.onAllNodes(SemanticsMatcher("blank bottom"){node->node.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)?.any{it.startsWith("Ruang di bawah halaman")}==true}).fetchSemanticsNodes().isNotEmpty()
+                compose.runOnIdle { assertEquals("$mode pan must stay on this page",1,page);assertTrue("$mode vertical pan must move the document ($before -> $offset)",offset>before+.01f || blankBottom) }
                 compose.onNodeWithTag("pdf-viewport").performTouchInput { doubleClick(center) }
                 compose.waitForIdle()
                 compose.runOnIdle { assertEquals("$mode double tap resets zoom",1f,zoom,.01f) }
@@ -133,7 +136,7 @@ class PdfModesUiTest {
                     PdfReader(document,book.copy(position=page,offset=offset),jump,command,zoomState,settings,{p,f->page=p;offset=f},{},{},{throw AssertionError(it)})
                 }
             } }
-            for(orientation in listOf(ReaderOrientation.Auto,ReaderOrientation.Landscape)) for(mode in PageTurn.entries) {
+            for(orientation in listOf(ReaderOrientation.Auto,ReaderOrientation.Landscape)) for(mode in PageTurn.available) {
                 compose.runOnIdle { wide=false;zoomState.floatValue=1f;settings=settings.copy(readerOrientation=orientation,pageTurn=mode);jump=1 to 0f;command++ }
                 compose.waitForIdle()
                 compose.waitUntil(15_000) { compose.onAllNodesWithContentDescription("Halaman 2").fetchSemanticsNodes().isNotEmpty() }
@@ -165,7 +168,7 @@ class PdfModesUiTest {
         val book=Book("blank","Buku ruang kosong",format="PDF",fileName="blank.pdf",hash="b".repeat(64),total=3)
         try{
             compose.setContent{SpotibookTheme(settings){PdfReader(document,book.copy(position=page,offset=offset),jump,command,zoom,settings,{p,f->page=p;offset=f},{},{},{throw AssertionError(it)})}}
-            for(mode in PageTurn.entries){
+            for(mode in PageTurn.available){
                 compose.runOnIdle{settings=settings.copy(pageTurn=mode);zoom.floatValue=2f;jump=0 to 0f;command++};compose.waitForIdle()
                 compose.waitUntil(10_000){compose.onAllNodesWithContentDescription("Halaman 1").fetchSemanticsNodes().isNotEmpty()}
                 compose.onNodeWithTag("pdf-viewport").performTouchInput{swipe(androidx.compose.ui.geometry.Offset(center.x,150f),androidx.compose.ui.geometry.Offset(center.x,600f),500)}
@@ -184,7 +187,7 @@ class PdfModesUiTest {
         val zoom=mutableFloatStateOf(1f);var settings by mutableStateOf(Settings(readerTheme="Light"));val book=Book("spread","Dua halaman",format="PDF",fileName="spread.pdf",hash="c".repeat(64),total=3,position=1)
         try{
             compose.setContent{SpotibookTheme(settings){PdfReader(document,book,null,0,zoom,settings,{_,_->},{},{},{throw AssertionError(it)})}}
-            for(mode in PageTurn.entries){
+            for(mode in PageTurn.available){
                 compose.runOnIdle{settings=settings.copy(pageTurn=mode)};compose.waitForIdle()
                 compose.waitUntil(10_000){compose.onAllNodesWithContentDescription("Halaman 2").fetchSemanticsNodes().isNotEmpty()}
                 val left=compose.onNodeWithContentDescription("Halaman 1").getUnclippedBoundsInRoot();val right=compose.onNodeWithContentDescription("Halaman 2").getUnclippedBoundsInRoot()
@@ -192,6 +195,25 @@ class PdfModesUiTest {
                 assertEquals(1f,zoom.floatValue)
             }
             compose.runOnIdle{captureScreen(compose.activity,"pdf-dua-halaman")}
+        }finally{compose.setContentPlaceholder();runBlocking{document.shutdown()};file.delete()}
+    }
+    @Test fun zoomAllowsContinuousSidewaysTravelAndRestoresTheSelectedMode() {
+        val file=File(compose.activity.cacheDir,"sideways.pdf");fixture(file);val document=PdfDocument(file)
+        var page by mutableIntStateOf(0);var offset by mutableFloatStateOf(0f)
+        val zoom=mutableFloatStateOf(2f)
+        val settings=Settings(pageTurn=PageTurn.Scrolling,readerTheme="Light")
+        val book=Book("sideways","Samping",format="PDF",fileName="sideways.pdf",hash="e".repeat(64),total=3)
+        try {
+            compose.setContent { SpotibookTheme(settings){PdfReader(document,book.copy(position=page,offset=offset),null,0,zoom,settings,{p,f->page=p;offset=f},{},{},{})} }
+            compose.waitUntil(15000){compose.onAllNodesWithContentDescription("Halaman 1").fetchSemanticsNodes().isNotEmpty()}
+            repeat(5){compose.onNodeWithTag("pdf-viewport").performTouchInput{swipeLeft(durationMillis=500)};compose.waitForIdle()}
+            compose.runOnIdle{assertTrue("Zoom must allow reaching another page",page>0);assertEquals(PageTurn.Scrolling,settings.pageTurn)}
+            compose.onNodeWithTag("pdf-viewport").performTouchInput{doubleClick(center)};compose.waitForIdle()
+            compose.runOnIdle{assertEquals(1f,zoom.floatValue,.01f)}
+            compose.waitUntil(15000){compose.onAllNodesWithTag("pdf-vertical-ready").fetchSemanticsNodes().isNotEmpty()}
+            val before=offset
+            compose.onNodeWithTag("pdf-viewport").performTouchInput{swipeUp(durationMillis=500)};compose.waitForIdle()
+            compose.runOnIdle{assertTrue("Normal zoom must restore vertical scrolling",offset>before || page==2)}
         }finally{compose.setContentPlaceholder();runBlocking{document.shutdown()};file.delete()}
     }
     private fun fixture(file:File) {

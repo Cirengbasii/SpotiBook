@@ -21,6 +21,26 @@ import com.spotibook.app.background.FocusAudio
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk=[35],application=SpotibookApp::class)
 class FocusIntegrationTest {
+    @Test(timeout=30000) fun completionPlaysWithoutNotificationPermissionAndSilentRemainsSilent()=runBlocking{
+        val app=ApplicationProvider.getApplicationContext<SpotibookApp>()
+        shadowOf(app).denyPermissions(android.Manifest.permission.POST_NOTIFICATIONS)
+        app.getSystemService(android.media.AudioManager::class.java).ringerMode=android.media.AudioManager.RINGER_MODE_NORMAL
+        org.robolectric.shadows.ShadowToneGenerator.reset()
+        app.repository.preferences.update{it.copy(focusNotification=true,focusSound="Gentle",focusVolume=.5f)}
+        app.focus.start(1,null)
+        ShadowSystemClock.advanceBy(Duration.ofMinutes(1));app.focus.recover()
+        withTimeout(5000){while(org.robolectric.shadows.ShadowToneGenerator.getPlayedTones().isEmpty()){org.robolectric.shadows.ShadowLooper.idleMainLooper();delay(10)}}
+        assertEquals(1,org.robolectric.shadows.ShadowToneGenerator.getPlayedTones().size)
+        assertTrue(app.getSystemService(NotificationManager::class.java).activeNotifications.isEmpty())
+        val drained=async{app.focus.awaitAlert()}
+        withTimeout(5000){while(!drained.isCompleted){org.robolectric.shadows.ShadowLooper.idleMainLooper(1,java.util.concurrent.TimeUnit.SECONDS);delay(10)}}
+        drained.await()
+        app.repository.preferences.update{it.copy(focusSound="Silent")}
+        app.focus.start(1,null);ShadowSystemClock.advanceBy(Duration.ofMinutes(1));app.focus.recover()
+        repeat(10){org.robolectric.shadows.ShadowLooper.idleMainLooper();delay(10)}
+        assertEquals(1,org.robolectric.shadows.ShadowToneGenerator.getPlayedTones().size)
+        app.focus.stop()
+    }
     @Test fun chosenSoundIsCopiedAndInvalidReplacementKeepsThePreviousSound()=runBlocking{
         val app=ApplicationProvider.getApplicationContext<SpotibookApp>()
         val source=File(app.cacheDir,"pilihan.mp3").apply{writeBytes(byteArrayOf(73,68,51,4,0,0,0,0,0,0))}
@@ -60,6 +80,7 @@ class FocusIntegrationTest {
         ShadowSystemClock.advanceBy(Duration.ofMinutes(1));app.focus.recover(id);app.focus.recover(id)
         assertEquals(1,app.repository.dao.allFocus().size)
         val manager=app.getSystemService(NotificationManager::class.java)
+        withTimeout(5000){while(manager.activeNotifications.none{it.id==101}){org.robolectric.shadows.ShadowLooper.idleMainLooper();delay(10)}}
         val notice=manager.activeNotifications.single{it.id==101}
         assertEquals("focus_complete",notice.notification.channelId)
         assertNull(manager.getNotificationChannel("focus_complete").sound)

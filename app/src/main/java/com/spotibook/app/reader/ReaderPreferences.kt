@@ -8,9 +8,11 @@ enum class PageTurn(val title: String, val description: String) {
     Withdrawal("Withdrawal", "Lembar ditarik dengan tekukan kertas"),
     Overlay("Overlay", "Halaman baru menutupi halaman sebelumnya"),
     Shift("Shift", "Geser halaman ke kanan atau kiri"),
-    Scroll("Scroll", "Geser atas–bawah, satu halaman sekaligus"),
+    Scroll("Scroll", "Pilihan lama; dialihkan ke Scrolling"),
     NoAnimation("No Animation", "Ganti halaman langsung, tanpa gerakan"),
-    Scrolling("Scrolling", "Gulir atas–bawah tanpa jeda antarhalaman")
+    Scrolling("Scrolling", "Gulir atas–bawah tanpa jeda antarhalaman"),
+    HorizontalScrolling("Scrolling samping", "Gulir kanan–kiri menyambung antarhalaman");
+    companion object { val available get() = entries.filter { it != Scroll } }
 }
 
 @Serializable

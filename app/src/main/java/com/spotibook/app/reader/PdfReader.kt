@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.*
 import com.spotibook.app.data.Book
 import com.spotibook.app.data.Settings
@@ -74,11 +75,13 @@ fun PdfReader(
     var handledCommand by remember(document){mutableLongStateOf(-1)}
     var transforming by remember{mutableStateOf(false)}
     val zoom by zoomState
+    var zoomScrolling by remember { mutableStateOf(zoom>1f) }
+    LaunchedEffect(zoom,transforming){if(!transforming)zoomScrolling=zoom>1.001f}
     BoxWithConstraints(Modifier.fillMaxSize().clipToBounds()){
         val spread=maxWidth>maxHeight
         val stride=if(spread)2 else 1
         val units=(document.count+stride-1)/stride
-        val mode=settings.pageTurn
+        val mode=if(zoomScrolling)PageTurn.HorizontalScrolling else if(settings.pageTurn==PageTurn.Scroll)PageTurn.Scrolling else settings.pageTurn
         val background=if(spread)Color(0xFF11171C)else when(settings.readerTheme){"Dark","Black"->Color(0xFF171C20);"Sepia"->Color(0xFFDDD1B9);else->Color(0xFFE5E7E4)}
         val geometry=PdfGeometry(if(spread)PdfFit.Page else settings.pdfFit,settings.pdfMargin,maxWidth,maxHeight)
         val viewportHeight=maxHeight;val viewportWidth=maxWidth
@@ -95,7 +98,40 @@ fun PdfReader(
                 if(spread&&zoom<=1f){val first=unit*stride;val target=(first+if(fraction>.5f)1 else 0).coerceAtMost(document.count-1);latestLocation(target,offsets[unit]?:0f)}
                 readerTap(fraction,settings,turn,toggle)
             }
-            if(mode==PageTurn.Scrolling){
+            if(mode==PageTurn.HorizontalScrolling){
+                val list=rememberLazyListState(start)
+                val vertical=rememberScrollState()
+                val heights=remember(geometry){mutableStateMapOf<Int,Int>()}
+                val density=LocalDensity.current
+                val widthPx=with(density){viewportWidth.toPx()}
+                val unit by remember(list,widthPx){derivedStateOf{(list.firstVisibleItemIndex+((list.firstVisibleItemScrollOffset+widthPx/2)/widthPx).toInt()).coerceAtMost(units-1)}}
+                val extent=heights[unit]?:with(density){viewportHeight.toPx()}.toInt()
+                var navigating by remember(geometry){mutableStateOf(true)}
+                LaunchedEffect(navigationKey,geometry){
+                    val command=jump?.takeIf{navigationKey>handledCommand}
+                    val page=command?.first?:if(navigating)currentBook.position else return@LaunchedEffect
+                    val fraction=command?.second?:currentBook.offset
+                    val target=(page/stride).coerceIn(0,units-1)
+                    navigating=true;list.scrollToItem(target)
+                    val height=snapshotFlow{heights[target]}.filterNotNull().first()
+                    withFrameNanos{};vertical.scrollTo((height*fraction).toInt())
+                    if(command!=null)handledCommand=navigationKey
+                    latestLocation(page,fraction);navigating=false
+                }
+                LaunchedEffect(list,vertical,geometry){snapshotFlow{Triple(unit,vertical.value,navigating)}.collect{(index,pixels,moving)->
+                    if(!moving)heights[index]?.let{report(index,pixels.toFloat()/it.coerceAtLeast(1))}
+                }}
+                PdfZoomViewport(zoomState,vertical,widthPx,interaction={transforming=it},tap={tap(unit,it)},horizontal=list){virtualHeight,enabled->
+                    Box(Modifier.fillMaxSize().then(if(!navigating)Modifier.testTag("pdf-horizontal-ready")else Modifier).verticalScroll(vertical,enabled=enabled)){
+                        LazyRow(Modifier.fillMaxWidth().height(maxOf(virtualHeight,with(density){extent.toDp()})),state=list,userScrollEnabled=enabled){items(units,key={it}){index->
+                            Box(Modifier.width(viewportWidth)){
+                                PdfPageGroup(document,index*stride,stride,viewportHeight,false,zoomState,settings,spread,0f,0,null,false,
+                                    {height,_->heights[index]=height},{},{},{},error)
+                            }
+                        }}
+                    }
+                }
+            }else if(mode==PageTurn.Scrolling){
                 val list=rememberLazyListState(start)
                 val heights=remember(geometry){mutableStateMapOf<Int,Int>()}
                 val widths=remember(geometry){mutableStateMapOf<Int,Float>()}
@@ -116,7 +152,7 @@ fun PdfReader(
                 }}
                 val density=LocalDensity.current
                 PdfZoomViewport(zoomState,list,widths[list.firstVisibleItemIndex]?:with(density){viewportWidth.toPx()},interaction={transforming=it},tap={tap(list.firstVisibleItemIndex,it)}){_,enabled->
-                    LazyColumn(Modifier.fillMaxSize(),state=list,userScrollEnabled=enabled){items(units,key={it}){unit->
+                    LazyColumn(Modifier.fillMaxSize().then(if(!navigating)Modifier.testTag("pdf-vertical-ready")else Modifier),state=list,userScrollEnabled=enabled){items(units,key={it}){unit->
                         PdfPageGroup(document,unit*stride,stride,viewportHeight,false,zoomState,settings,spread,0f,0,null,false,
                             {height,width->heights[unit]=height;widths[unit]=width},{},{},{},error)
                     }}
@@ -143,8 +179,7 @@ fun PdfReader(
                             fold={if(mode==PageTurn.Withdrawal)relative().coerceIn(0f,1f)else 0f})
                     }
                 }
-                if(mode==PageTurn.Scroll)VerticalPager(pager,Modifier.fillMaxSize(),userScrollEnabled=zoom<=1f&&!transforming,key={it},pageContent=pageContent)
-                else HorizontalPager(pager,Modifier.fillMaxSize(),userScrollEnabled=zoom<=1f&&!transforming,key={it},pageContent=pageContent)
+                HorizontalPager(pager,Modifier.fillMaxSize(),userScrollEnabled=zoom<=1f&&!transforming,key={it},pageContent=pageContent)
             }
         }
         }

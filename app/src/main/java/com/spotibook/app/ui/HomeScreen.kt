@@ -35,25 +35,22 @@ import java.time.format.DateTimeFormatter
     val read = daily[today] ?: 0
     val current = books.firstOrNull { it.status == "Reading" } ?: books.firstOrNull { it.status == "To read" } ?: books.firstOrNull()
     val blue = MaterialTheme.colorScheme.primary
+    val dark=MaterialTheme.colorScheme.background.luminance()<.2f
+    val cardInk=if(dark)Color(0xFFFFEEE8)else Color(0xFF17213F)
     LazyColumn(Modifier.fillMaxSize().testTag("home-list"), contentPadding = PaddingValues(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         item {
-            Column(Modifier.fillMaxWidth().drawBehind {
-                val path = Path().apply {
-                    moveTo(0f, 0f); lineTo(size.width, 0f); lineTo(size.width, size.height - 85.dp.toPx())
-                    cubicTo(size.width * .7f, size.height - 10.dp.toPx(), size.width * .25f, size.height - 80.dp.toPx(), 0f, size.height - 55.dp.toPx()); close()
-                }; drawPath(path, blue)
-            }.padding(horizontal = 22.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Spotibook", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
-                    FilledIconButton({ navigate("settings") }, colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = .16f), contentColor = MaterialTheme.colorScheme.onPrimary), modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.Tune, "Pengaturan") }
+                    Text("Spotibook", Modifier.weight(1f), style = MaterialTheme.typography.headlineLarge, color = ReadingCoral)
+                    if(current!=null)IconButton(import){Icon(Icons.Outlined.Add,"Impor buku")}
+                    FilledIconButton({ navigate("settings") }, colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = blue), modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.Tune, "Pengaturan") }
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(when(hour) { in 5..10 -> "Selamat pagi :)"; in 11..14 -> "Selamat siang :)"; in 15..17 -> "Selamat sore :)"; else -> "Selamat malam :)" }, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimary)
-                    Text(today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Indonesian)), color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.bodyMedium)
+                    Text(when(hour) { in 5..10 -> "Selamat pagi"; in 11..14 -> "Selamat siang"; in 15..17 -> "Selamat sore"; else -> "Selamat malam" }, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                    Text(today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Indonesian)), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
                 }
-                Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 6.dp, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                Surface(shape = RoundedCornerShape(24.dp), color = if(current==null)MaterialTheme.colorScheme.surface else if(dark)Color(0xFF713D3D)else ReadingCoral, contentColor=if(current==null)MaterialTheme.colorScheme.onSurface else cardInk, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
                     Column {
-                        Box(Modifier.fillMaxWidth().height(7.dp).background(ReadingGold))
                         if (current == null) Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             Icon(Icons.Outlined.AutoStories, null, Modifier.size(38.dp), tint = blue)
                             Text("Tambahkan buku pertama", style = MaterialTheme.typography.titleLarge)
@@ -62,8 +59,8 @@ import java.time.format.DateTimeFormatter
                         } else Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Outlined.Bookmark, null, tint = MaterialTheme.colorScheme.secondary)
-                                Text(if(current.status == "Finished") "Baca lagi" else "Sedang dibaca", Modifier.weight(1f).padding(start = 7.dp), style = MaterialTheme.typography.labelLarge, color = blue)
-                                Text("${(current.progress * 100).toInt()}%", style = MaterialTheme.typography.titleMedium, color = blue)
+                                Text(if(current.status == "Finished") "Baca lagi" else "Lanjut membaca", Modifier.weight(1f).padding(start = 7.dp), style = MaterialTheme.typography.labelLarge, color = cardInk)
+                                Text("${(current.progress * 100).toInt()}%", style = MaterialTheme.typography.titleMedium, color = cardInk)
                             }
                             BoxWithConstraints(Modifier.fillMaxWidth()) {
                                 val coverWidth = minOf(132.dp, maxWidth * .34f)
@@ -71,13 +68,13 @@ import java.time.format.DateTimeFormatter
                                     BookCover(current, model, Modifier.width(coverWidth).height(coverWidth * 1.5f).clickable { open(current.id) })
                                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(9.dp)) {
                                         Text(current.title, style = MaterialTheme.typography.titleLarge, maxLines = 4, overflow = TextOverflow.Ellipsis)
-                                        Text(current.author.labelId(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
-                                        Text("${if(current.format == "PDF") "Halaman" else "Bab"} ${current.position + 1} / ${current.total}", style = MaterialTheme.typography.labelMedium, color = blue)
+                                        Text(current.author.labelId(), style = MaterialTheme.typography.bodyMedium, color = cardInk, maxLines = 2)
+                                        Text("${if(current.format == "PDF") "Halaman" else "Bab"} ${current.position + 1} / ${current.total}", style = MaterialTheme.typography.labelMedium, color = cardInk)
                                     }
                                 }
                             }
-                            LinearProgressIndicator({ current.progress }, Modifier.fillMaxWidth().height(6.dp), color = blue, trackColor = MaterialTheme.colorScheme.primaryContainer)
-                            Button({ open(current.id) }, Modifier.fillMaxWidth().heightIn(min = 54.dp)) { Icon(Icons.Outlined.MenuBook, null); Spacer(Modifier.width(9.dp)); Text("Buka buku") }
+                            LinearProgressIndicator({ current.progress }, Modifier.fillMaxWidth().height(6.dp), color = cardInk, trackColor = Color.White.copy(alpha=.25f))
+                            Button({ open(current.id) }, Modifier.fillMaxWidth().heightIn(min = 54.dp),colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF173E82),contentColor=Color.White)) { Icon(Icons.Outlined.MenuBook, null); Spacer(Modifier.width(9.dp)); Text("Lanjutkan") }
                         }
                     }
                 }
@@ -85,8 +82,7 @@ import java.time.format.DateTimeFormatter
         }
         item {
             Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (current != null) FilledTonalButton(import, Modifier.weight(1f).heightIn(min = 58.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer)) { Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(6.dp)); Text("Impor buku") }
-                FilledTonalButton({ navigate("focus") }, Modifier.weight(1f).heightIn(min = 58.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) { Icon(Icons.Outlined.Timelapse, null); Spacer(Modifier.width(7.dp)); Text("Waktu fokus") }
+                FilledTonalButton({ navigate("focus") }, Modifier.weight(1f).heightIn(min = 64.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer)) { Icon(Icons.Outlined.Timelapse, null); Spacer(Modifier.width(7.dp)); Text("Waktu fokus") }
             }
         }
         item {

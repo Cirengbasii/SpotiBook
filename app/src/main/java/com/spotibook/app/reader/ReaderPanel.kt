@@ -158,13 +158,13 @@ fun ReaderPanel(
 @Composable fun PageModeChoices(selected: PageTurn, select: (PageTurn) -> Unit) {
     BoxWithConstraints {
         val columns = if (maxWidth >= 520.dp) 3 else 2
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { PageTurn.entries.chunked(columns).forEach { row ->
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { PageTurn.available.chunked(columns).forEach { row ->
             Row(Modifier.height(IntrinsicSize.Min),horizontalArrangement = Arrangement.spacedBy(10.dp)) { row.forEach { mode ->
                 val active = mode == selected
                 Surface(Modifier.weight(1f).fillMaxHeight().testTag("reader-mode-${mode.name}").selectable(active, role = Role.RadioButton, onClick = { select(mode) }), shape = RoundedCornerShape(12.dp), color = if (active) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow, border = BorderStroke(if (active) 1.5.dp else .5.dp, if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)) {
                     Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Icon(when(mode) { PageTurn.Withdrawal -> Icons.Outlined.AutoStories; PageTurn.Overlay -> Icons.Outlined.Layers; PageTurn.Shift -> Icons.Outlined.SwapHoriz; PageTurn.Scroll -> Icons.Outlined.SwapVert; PageTurn.NoAnimation -> Icons.Outlined.Description; PageTurn.Scrolling -> Icons.Outlined.UnfoldMore }, null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(when(mode) { PageTurn.Withdrawal -> Icons.Outlined.AutoStories; PageTurn.Overlay -> Icons.Outlined.Layers; PageTurn.Shift, PageTurn.HorizontalScrolling -> Icons.Outlined.SwapHoriz; PageTurn.Scroll -> Icons.Outlined.SwapVert; PageTurn.NoAnimation -> Icons.Outlined.Description; PageTurn.Scrolling -> Icons.Outlined.UnfoldMore }, null, tint = MaterialTheme.colorScheme.primary)
                             if (active) Icon(Icons.Outlined.CheckCircle, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                         }
                         Text(mode.title, style = MaterialTheme.typography.titleMedium)

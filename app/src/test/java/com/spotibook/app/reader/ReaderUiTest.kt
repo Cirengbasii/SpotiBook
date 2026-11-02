@@ -33,12 +33,12 @@ class ReaderUiTest {
     @Test fun allSixModesCanBeSelectedOnNarrowScreen() {
         var selected by mutableStateOf(PageTurn.Scrolling)
         compose.setContent { SpotibookTheme(Settings()) { Surface(Modifier.fillMaxSize()) { Column(Modifier.padding(20.dp)) { Text("Perpindahan halaman",style=MaterialTheme.typography.titleLarge);Spacer(Modifier.height(16.dp));PageModeChoices(selected){selected=it} } } } }
-        for(mode in PageTurn.entries)compose.onNodeWithTag("reader-mode-${mode.name}").performClick().assertIsSelected()
+        for(mode in PageTurn.available)compose.onNodeWithTag("reader-mode-${mode.name}").performClick().assertIsSelected()
         save("pilihan-halaman")
     }
     @Test @Config(qualifiers="w740dp-h360dp-mdpi") fun modeChoicesFitLandscape() {
         compose.setContent { SpotibookTheme(Settings(appearance="Dark")) { Surface(Modifier.fillMaxSize()) { Column(Modifier.padding(20.dp)) { PageModeChoices(PageTurn.Withdrawal){} } } } }
-        PageTurn.entries.forEach { compose.onNodeWithTag("reader-mode-${it.name}").assertIsDisplayed() }
+        PageTurn.available.forEach { compose.onNodeWithTag("reader-mode-${it.name}").assertIsDisplayed() }
         save("pilihan-halaman-lanskap")
     }
     @Test fun readerWindowRestoresOrientationBrightnessAndKeepAwakeOnExit() {

@@ -19,6 +19,31 @@ import androidx.compose.ui.semantics.Role
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class HomeUiTest {
     @get:Rule val compose=createAndroidComposeRule<MainActivity>()
+    @Test fun coralHomeSupportsLightAndDarkWithRealBookState(){
+        val app=compose.activity.application as SpotibookApp
+        val id=java.util.UUID.randomUUID().toString()
+        kotlinx.coroutines.runBlocking{app.repository.dao.putBook(com.spotibook.app.data.Book(id,"Ruang untuk Tumbuh",author="Nadia Putri",format="PDF",fileName="book.pdf",hash="a".repeat(64),total=200,position=83,progress=.42f,status="Reading"));app.repository.preferences.update{it.copy(appearance="Light")}}
+        compose.waitUntil(10000){compose.onAllNodesWithText("Lanjutkan").fetchSemanticsNodes().isNotEmpty()}
+        compose.onNodeWithText("Lanjutkan").assertIsDisplayed();save("beranda-coral-terang")
+        kotlinx.coroutines.runBlocking{app.repository.preferences.update{it.copy(appearance="Dark")}}
+        compose.waitForIdle();compose.onNodeWithText("Lanjutkan").assertIsDisplayed();save("beranda-coral-gelap")
+    }
+    @Test fun focusCompletionAppearsWithoutOpeningFocusAndCanBeDismissed() {
+        val app=compose.activity.application as SpotibookApp
+        kotlinx.coroutines.runBlocking {
+            app.repository.preferences.update{it.copy(focusNotification=false,focusSound="Silent")}
+            app.focus.start(1,null)
+        }
+        compose.waitForIdle()
+        org.robolectric.shadows.ShadowSystemClock.advanceBy(java.time.Duration.ofMinutes(1))
+        compose.mainClock.advanceTimeBy(60_100)
+        compose.waitUntil(10000){compose.onAllNodesWithText("Fokus selesai").fetchSemanticsNodes().isNotEmpty()}
+        compose.onNodeWithText("Fokus selesai").assertIsDisplayed()
+        save("fokus-selesai")
+        compose.onNodeWithContentDescription("Tutup penanda Fokus").performClick()
+        compose.waitForIdle();compose.onNodeWithText("Fokus selesai").assertDoesNotExist()
+        kotlinx.coroutines.runBlocking{app.focus.stop()}
+    }
     @Test fun homeAndLibraryAreIndonesianAndCanBeNavigated() {
         compose.onNodeWithText("Tambahkan buku pertama").assertIsDisplayed()
         save("beranda")
@@ -27,6 +52,9 @@ class HomeUiTest {
         save("pustaka")
         compose.onNodeWithText("Profil").performClick()
         compose.onNodeWithText("Bahasa aplikasi · Bahasa Indonesia").assertIsDisplayed()
+        compose.onNode(hasText("Gelap") and SemanticsMatcher.expectValue(SemanticsProperties.Role,Role.Checkbox)).performClick()
+        compose.waitUntil(5000){kotlinx.coroutines.runBlocking{(compose.activity.application as SpotibookApp).repository.preferences.settings.first().appearance}=="Dark"}
+        save("profil-coral-gelap")
     }
     @Test @Config(qualifiers="w900dp-h600dp-mdpi") fun largeScreenUsesNavigationRail() {
         compose.onNodeWithText("Pustaka").performClick()
