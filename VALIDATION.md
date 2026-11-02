@@ -1,10 +1,12 @@
-# Validasi Spotibook 1.6.0
+# Validasi Spotibook 1.7.0
 
-2 November 2026, Asia/Jakarta. VersionCode 7, package com.spotibook.app. Room tetap skema 2; migrasi 1 ke 2 yang sudah ada tetap dipakai.
+2 November 2026, Asia/Jakarta. VersionCode 8, package com.spotibook.app. Room tetap skema 2; migrasi 1 ke 2 yang sudah ada tetap dipakai.
 
 ## Hasil
 
-BUILD SUCCESSFUL untuk testDebugUnitTest, assembleDebug, assembleDebugAndroidTest, assembleRelease dan lintDebug. **68 tes lulus; 0 gagal; 0 error; 0 dilewati.** Lint: 0 error, 51 warning. Release vital lint lulus. Log lengkap: app/build/final-validation.log.
+BUILD SUCCESSFUL untuk testDebugUnitTest, assembleDebug, assembleDebugAndroidTest, assembleRelease dan lintDebug. **69 tes lulus; 0 gagal; 0 error; 0 dilewati.** Lint: 0 error, 53 warning. Release vital lint lulus. Log lengkap: app/build/final-validation.log.
+
+Revisi 1.7 menambahkan satu tes pemilihan OCR/native text. OfflineOcrDeviceTest membuat PDF berisi gambar saja dan memeriksa hasil OCR/cache pada Android; paketnya berhasil dikompilasi namun belum dijalankan karena tidak ada perangkat. OCR native ML Kit tidak disimulasikan sebagai bukti akurasi host. Model Latin disertakan di APK; tidak memakai model unduhan atau cloud API. Render beranda-coral-terang/gelap terbaru diperiksa: logo dua warna, ilustrasi, susunan kartu baru dan kalender sebelum statistik harian. Ikon launcher menggunakan adaptive-icon dengan latar merah.
 
 | Suite | Tes | Gagal |
 | --- | ---: | ---: |
@@ -29,7 +31,7 @@ BUILD SUCCESSFUL untuk testDebugUnitTest, assembleDebug, assembleDebugAndroidTes
 - Tema Coral diterapkan melalui sistem warna bersama: kartu bacaan coral, tombol lanjut biru, permukaan putih/peach dan pasangan charcoal/coral untuk gelap. Render beranda-coral-terang.png dan beranda-coral-gelap.png diperiksa. Pilihan tema gelap diuji melalui UI dan tersimpan ke preferensi. Navigasi HP dan rail tablet tetap lulus. Sampul pada render adalah fixture, bukan buku yang ditambahkan ke aplikasi.
 - SpeechTextTest (2 tes) memeriksa pembagian teks panjang tanpa kehilangan kata serta halaman kosong. SpeechIntegrationTest (2 tes) benar-benar membuat/membaca PDF lewat PDFBox dan mengambil HTML bab EPUB dari direktori impor; script/style tidak dibacakan. Kedua suite ini menambah 4 tes pada tabel di atas.
 - Pengujian layanan TTS menyediakan suara Indonesia offline dan online berperingkat lebih tinggi: layanan memilih offline, mengirim teks ke Android TTS, menerima jeda/stop dan menutup mesin. Batas mesin suara diwakili ShadowTextToSpeech; tes tidak menghasilkan suara speaker nyata.
-- Pembaca lanskap diuji membuka/menutup panel Dengarkan buku. Layanan media, notifikasi MediaStyle/MediaSession, audio focus, wake lock terbatas dan penyimpanan posisi terpisah menangani pemutaran di luar pembaca. Teks yang sedang dibaca ditampilkan dalam panel; sorotan koordinat paragraf PDF belum ditambahkan. Suara neural khusus dan OCR tidak disertakan.
+- Pembaca lanskap diuji membuka/menutup panel Dengarkan buku. Layanan media, notifikasi MediaStyle/MediaSession, audio focus, wake lock terbatas dan penyimpanan posisi terpisah menangani pemutaran di luar pembaca. Teks dibaca tampil dalam panel; sorotan koordinat paragraf PDF dan suara neural khusus belum ditambahkan. OCR Latin sekarang dibundel; aset model telah diperiksa di APK.
 
 - Nada bawaan benar-benar dipanggil melalui ShadowToneGenerator saat POST_NOTIFICATIONS ditolak. Pilihan Silent tidak menambah bunyi. Ini membuktikan pemanggilan API, bukan suara fisik speaker HP. Suara memakai stream alarm; izin notifikasi hanya mengatur notifikasi Android. Mode senyap/DND sistem tetap dihormati.
 - Penyampaian bunyi dimiliki scope aplikasi. Receiver dan worker menunggu penyampaian terbatas selesai sebelum melepaskan masa aktifnya; menutup layar/panel Fokus tidak membatalkan suara. Foreground deadline observer tetap aktif di akar aplikasi, termasuk saat membaca.
@@ -40,10 +42,10 @@ BUILD SUCCESSFUL untuk testDebugUnitTest, assembleDebug, assembleDebugAndroidTes
 
 ## APK
 
-APK pemasangan: app/build/outputs/apk/debug/app-debug.apk (85.247.873 byte). Verifikasi apksigner v2 valid dengan satu penanda tangan; sertifikat SHA-256 tetap 9bf12be1919a4af8d264c7f01034bb91a9a1ac91fc8e38dc4eb6397f5237ee1a. aapt memastikan versi 1.6.0/code 7 dan label Spotibook. Release APK masih unsigned. Ukuran serta SHA-256 masing-masing artefak ada di app/build/verification.json.
+APK pemasangan: app/build/outputs/apk/debug/app-debug.apk (131.981.194 byte). Verifikasi apksigner v2 valid dengan satu penanda tangan; sertifikat SHA-256 tetap 9bf12be1919a4af8d264c7f01034bb91a9a1ac91fc8e38dc4eb6397f5237ee1a. aapt memastikan versi 1.7.0/code 8, label Spotibook dan ikon adaptif. Release APK masih unsigned. SHA-256 artefak tercatat di app/build/verification.json.
 
 ## Batas pemeriksaan
 
-adb tidak menemukan perangkat. Kualitas suara Indonesia, audio speaker/headset, kontrol layar terkunci dan pemutaran saat layar mati/Doze belum diuji langsung pada HP. Izin normal FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PLAYBACK dan WAKE_LOCK ditambahkan untuk audio latar belakang; INTERNET tetap tidak diizinkan. Paket suara Indonesia offline harus tersedia di mesin TTS HP. PDF scan/gambar memerlukan OCR dan dilaporkan belum didukung. Pemutaran audio tidak menambah statistik membaca aktif ketika pembaca tidak aktif.
+adb tidak menemukan perangkat. Kualitas OCR dan suara Indonesia, audio speaker/headset, kontrol layar terkunci dan pemutaran saat layar mati/Doze belum diuji langsung pada HP. Izin normal FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PLAYBACK dan WAKE_LOCK menangani audio/persiapan teks; INTERNET tetap tidak diizinkan. Paket suara Indonesia offline harus tersedia di mesin TTS HP. OCR dapat kurang tepat untuk scan buram, tulisan tangan, tabel dan rumus. Pemutaran audio tidak menambah statistik membaca aktif ketika pembaca tidak aktif.
 
 Tes perangkat dapat dijalankan dengan .\gradlew.bat :app:connectedDebugAndroidTest setelah perangkat tersedia. Laporan host dan lint ada di app/build/reports/.

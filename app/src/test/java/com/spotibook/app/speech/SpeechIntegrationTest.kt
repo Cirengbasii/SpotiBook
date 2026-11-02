@@ -39,7 +39,7 @@ class SpeechIntegrationTest{
     @Test fun extractsRealPdfAndImportedEbookContent(){
         val app=ApplicationProvider.getApplicationContext<SpotibookApp>()
         for(format in listOf("PDF","EPUB")){
-            val book=makeBook(format);val text=extractSpeech(app.repository,book,0).joinToString(" ")
+            val book=makeBook(format);val text=runBlocking{extractSpeech(app.repository,book,0)}.joinToString(" ")
             assertTrue(text.contains("Mari membaca buku."));assertFalse(text.contains("jangan dibaca"));assertFalse(text.contains("rahasia"))
         }
     }

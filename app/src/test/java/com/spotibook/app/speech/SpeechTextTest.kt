@@ -4,6 +4,11 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class SpeechTextTest{
+    @Test fun imageOnlyPagesUseOcrAndNativeTextAvoidsUnnecessaryOcr()=kotlinx.coroutines.runBlocking{
+        var called=false
+        assertEquals("Hasil OCR bahasa Indonesia",readablePdfText(" \n "){called=true;"Hasil OCR bahasa Indonesia"});assertTrue(called)
+        called=false;assertEquals("Ini teks asli PDF.",readablePdfText("Ini teks asli PDF."){called=true;"OCR"});assertFalse(called)
+    }
     @Test fun longTextKeepsAllWordsAndFitsEngineLimits(){
         val text=(1..1800).joinToString(" "){"kalimat$it."}
         val chunks=speechChunks(text)

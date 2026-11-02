@@ -22,8 +22,22 @@ class HomeUiTest {
     @Test fun coralHomeSupportsLightAndDarkWithRealBookState(){
         val app=compose.activity.application as SpotibookApp
         val id=java.util.UUID.randomUUID().toString()
-        kotlinx.coroutines.runBlocking{app.repository.dao.putBook(com.spotibook.app.data.Book(id,"Ruang untuk Tumbuh",author="Nadia Putri",format="PDF",fileName="book.pdf",hash="a".repeat(64),total=200,position=83,progress=.42f,status="Reading"));app.repository.preferences.update{it.copy(appearance="Light")}}
+        val dir=app.repository.documents.directory(id);dir.mkdirs()
+        val cover=android.graphics.Bitmap.createBitmap(240,360,android.graphics.Bitmap.Config.ARGB_8888)
+        android.graphics.Canvas(cover).apply{
+            drawColor(0xffc4dfe1.toInt())
+            val p=android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+            p.color=0xfffbeed8.toInt();drawCircle(174f,150f,52f,p)
+            p.color=0xff809e92.toInt();drawPath(android.graphics.Path().apply{moveTo(0f,230f);quadTo(70f,150f,150f,220f);quadTo(200f,180f,240f,200f);lineTo(240f,360f);lineTo(0f,360f);close()},p)
+            p.color=0xff305a52.toInt();drawPath(android.graphics.Path().apply{moveTo(0f,280f);quadTo(100f,200f,240f,270f);lineTo(240f,360f);lineTo(0f,360f);close()},p)
+            p.color=0xff1b433e.toInt();p.textSize=30f;p.typeface=android.graphics.Typeface.create("serif",android.graphics.Typeface.BOLD)
+            drawText("Ruang untuk",25f,65f,p);drawText("Tumbuh",55f,100f,p)
+            p.color=0xfffbeed8.toInt();p.textSize=13f;drawText("NADIA PUTRI",73f,335f,p)
+        }
+        java.io.File(dir,"cover.png").outputStream().use{cover.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)};cover.recycle()
+        kotlinx.coroutines.runBlocking{app.repository.dao.putBook(com.spotibook.app.data.Book(id,"Ruang untuk Tumbuh",author="Nadia Putri",format="PDF",fileName="book.pdf",cover="cover.png",hash="a".repeat(64),total=200,position=83,progress=.42f,status="Reading"));app.repository.preferences.update{it.copy(appearance="Light")}}
         compose.waitUntil(10000){compose.onAllNodesWithText("Lanjutkan").fetchSemanticsNodes().isNotEmpty()}
+        compose.waitUntil(10000){compose.onAllNodesWithContentDescription("Sampul Ruang untuk Tumbuh").fetchSemanticsNodes().isNotEmpty()}
         compose.onNodeWithText("Lanjutkan").assertIsDisplayed();save("beranda-coral-terang")
         kotlinx.coroutines.runBlocking{app.repository.preferences.update{it.copy(appearance="Dark")}}
         compose.waitForIdle();compose.onNodeWithText("Lanjutkan").assertIsDisplayed();save("beranda-coral-gelap")

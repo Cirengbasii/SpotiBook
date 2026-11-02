@@ -1,5 +1,14 @@
 # Catatan perubahan Spotibook
 
+## 1.7.0 — 2 November 2026
+
+- OCR offline untuk halaman PDF tanpa teks: model Latin dibundel dalam APK, halaman dirender kemudian dikenali secara lokal. Teks asli tetap dipakai bila tersedia. Hasil OCR disimpan per halaman agar tidak dipindai ulang setiap diputar.
+- Pesan lama "PDF scan belum didukung" diganti dengan proses pemindaian dan petunjuk ketika teks benar-benar tidak ditemukan. Pemindaian dan audio mempertahankan wake lock terbatas agar CPU tetap aktif saat layar mati.
+- Beranda dibangun ulang: Spoti merah/book biru, ilustrasi matahari dan daun, teks putih di kartu coral, sampul di kiri serta progres/tombol di kanan (tombol turun ke bawah pada layar sempit atau font besar). Kartu Fokus dan kalender ditempatkan sebelum statistik harian.
+- Ikon adaptif baru: latar merah, buku putih/biru dan penanda kuning. Tema gelap tetap tersedia.
+- 69 tes host lulus; build APK/paket tes Android/release dan lint berhasil (0 error, 53 warning). Pengujian OCR pada PDF gambar disediakan di OfflineOcrDeviceTest, tetapi belum dijalankan karena HP/emulator belum terhubung. Tes host memeriksa pemilihan jalur OCR, bukan kualitas pengenalan native ML Kit.
+- Scan buram, tulisan tangan, rumus dan tata letak rumit masih dapat terbaca kurang tepat. Model OCR membuat APK debug universal berukuran sekitar 126 MiB. Kualitas suara tetap mengikuti paket suara Indonesia offline di HP.
+
 ## 1.6.0 — 2 November 2026
 
 - Tampilan Coral dengan kartu bacaan coral, tombol lanjut biru dan permukaan peach/putih. Tema gelap memakai charcoal dan coral lembut. Pilih Terang, Gelap atau Ikuti sistem melalui Profil.

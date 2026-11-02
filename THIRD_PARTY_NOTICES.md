@@ -1,5 +1,7 @@
 # Third-party notices
 
+Google ML Kit Text Recognition 16.0.1 is bundled for on-device Latin-script OCR. Its SDK/model is governed by Google's ML Kit terms, not the application's source license: https://developers.google.com/ml-kit/terms . No cloud OCR API is used.
+
 PDFBox-Android 2.0.27.0 (Tom Roush / Apache PDFBox) is used for offline PDF text extraction under the Apache License 2.0. Project and notices: https://github.com/TomRoush/PdfBox-Android . Transitive components retain their bundled license notices.
 
 Spotibook uses AndroidX libraries (including Compose, Room, DataStore, WorkManager, Navigation, WebKit and Glance), Kotlin and kotlinx under the Apache License 2.0. License: https://www.apache.org/licenses/LICENSE-2.0

@@ -25,7 +25,7 @@ import com.spotibook.app.speech.SpeechService
             Text("Tetap berbunyi saat layar mati. Kualitas suara mengikuti paket suara yang terpasang di HP.",style=MaterialTheme.typography.bodyMedium)
             if(same){
                 Text(state.title,style=MaterialTheme.typography.titleLarge)
-                if(state.loading)LinearProgressIndicator(Modifier.fillMaxWidth())
+                if(state.loading){LinearProgressIndicator(Modifier.fillMaxWidth());Text("Menyiapkan teks. PDF tanpa teks dipindai dengan OCR di perangkat.",style=MaterialTheme.typography.bodySmall)}
                 if(state.error.isNotEmpty())Text(state.error,color=MaterialTheme.colorScheme.error)
                 if(state.text.isNotEmpty())Surface(color=MaterialTheme.colorScheme.primaryContainer,shape=MaterialTheme.shapes.medium){Text(state.text,Modifier.padding(16.dp),maxLines=7)}
                 Text("Halaman / bab ${state.page+1}")

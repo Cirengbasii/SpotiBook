@@ -83,11 +83,12 @@ class SpeechService:Service(){
         if(page>=b.total){state.value=state.value.copy(playing=false,loading=false,text="Pembacaan buku selesai.");pause();return}
         state.value=state.value.copy(page=page.coerceAtLeast(0),chunk=0,loading=true,playing=false,error="")
         val own=generation
+        holdCpu()
         task=scope.launch{try{
             var index=page.coerceAtLeast(0);var found=emptyList<String>()
             while(index<b.total && index<page+12 && found.isEmpty()){ensureActive();found=withContext(Dispatchers.IO){extractSpeech(repo,b,index)};if(found.isEmpty())index++}
             if(own!=generation)return@launch
-            require(found.isNotEmpty()){"Tidak ada teks yang bisa dibaca. PDF hasil scan/gambar memerlukan OCR dan belum didukung."}
+            require(found.isNotEmpty()){"Teks belum ditemukan setelah pemindaian OCR. Coba halaman isi yang lebih jelas; halaman sampul atau gambar tanpa tulisan tidak dapat dibacakan."}
             chunks=found
             val saved=if(storage.getInt(b.id+"page",-1)==index)storage.getInt(b.id+"chunk",0).coerceIn(0,chunks.lastIndex)else 0
             state.value=state.value.copy(page=index,chunk=saved,loading=false);play()
@@ -100,11 +101,13 @@ class SpeechService:Service(){
     }
     private fun speak(){
         val s=state.value;val text=chunks.getOrNull(s.chunk)?:return
-        if(wake.isHeld)wake.release();wake.acquire(10*60*1000L)
+        generation++
+        holdCpu()
         state.value=s.copy(text=text);save();tts.setSpeechRate(s.speed)
         if(tts.speak(text,TextToSpeech.QUEUE_FLUSH,Bundle(),token())==TextToSpeech.ERROR){fail("Mesin suara gagal membaca teks.");return};update()
     }
     private fun save(){val s=state.value;if(s.bookId.isNotEmpty())storage.edit().putInt(s.bookId+"page",s.page).putInt(s.bookId+"chunk",s.chunk).apply()}
+    private fun holdCpu(){if(wake.isHeld)wake.release();wake.acquire(10*60*1000L)}
     private fun pause(){generation++;tts.stop();task?.cancel();state.value=state.value.copy(playing=false,loading=false);save();if(wake.isHeld)wake.release();audio.abandonAudioFocusRequest(focus);update();stopForeground(STOP_FOREGROUND_DETACH)}
     private fun move(delta:Int){val next=state.value.chunk+delta;if(next in chunks.indices){generation++;tts.stop();state.value=state.value.copy(chunk=next);play()}else load(state.value.page+delta)}
     private fun fail(message:String){pause();state.value=state.value.copy(error=message);update()}

@@ -1,22 +1,22 @@
 # Spotibook
 
-**Update 2 November 2026 — Spotibook 1.6.0:** tampilan Coral baru, pilihan terang/gelap/ikuti sistem, dan pembacaan buku dengan suara Indonesia offline. Kontrol audio tersedia dari pembaca dan notifikasi media. [Download APK terbaru](https://github.com/Cirengbasii/SpotiBook/releases/download/v1.6.0-preview.1/Spotibook-1.6.0-preview.apk) · [Catatan perubahan](CHANGELOG.md).
+**Update 2 November 2026 — Spotibook 1.7.0:** Beranda disusun ulang mengikuti referensi Coral, logo dua warna, ilustrasi, ikon aplikasi merah, dan OCR offline untuk membacakan PDF scan. [Download APK terbaru](https://github.com/Cirengbasii/SpotiBook/releases/download/v1.7.0-preview.1/Spotibook-1.7.0-preview.apk) · [Catatan perubahan](CHANGELOG.md).
 
 | Coral terang | Coral gelap |
 | --- | --- |
 | <img src="docs/screenshots/coral-terang.png" width="240" alt="Beranda Coral terang"> | <img src="docs/screenshots/coral-gelap.png" width="240" alt="Beranda Coral gelap"> |
 
-Untuk mendengarkan, buka buku → ikon **headphone** → **Baca dari halaman ini**. Suara Indonesia offline harus tersedia di mesin TTS HP; kualitas suara mengikuti perangkat. PDF scan/gambar belum didukung. Layanan audio disiapkan untuk pemutaran saat layar mati, tetapi perilakunya belum diverifikasi di HP. Gambar di atas memakai data pengujian.
+Untuk mendengarkan, buka buku → ikon **headphone** → **Baca dari halaman ini**. Suara Indonesia offline harus tersedia di mesin TTS HP. Jika PDF tidak memiliki teks, model OCR Latin yang dibundel dalam APK memindai halaman di perangkat, lalu menyimpan hasilnya. Scan buram, tulisan tangan, rumus dan tata letak rumit dapat menghasilkan bacaan kurang tepat. OCR/suara di HP belum diverifikasi karena perangkat belum terhubung. Gambar di atas memakai data pengujian, bukan buku bawaan.
 
-## Version 1.6.0
+## Version 1.7.0
 
 The app now uses the selected Coral direction: white surfaces, a coral reading card, navy reading action and peach Focus shortcut. Dark mode uses charcoal surfaces and muted coral; Profile → Tema aplikasi offers Light, Dark and System. The bookshelf layout and actual cover calendar retain their data and behavior. The old accent picker is replaced by the coherent Coral palette. PDF page colors remain controlled independently by reader themes.
 
 **Dengarkan buku** in the reader opens offline Indonesian Android Text-to-Speech. PDFBox-Android extracts text from PDF pages on all supported Android versions; EPUB/TXT/HTML use the imported chapter content. A media-playback foreground service, MediaSession, audio focus, bounded CPU wake lock and media notification keep playback independent of the reader screen, with lock-screen/headset controls. Closing the reader does not stop speech. Pause, resume, stop, previous/next text section and 0.75–2× speed are available. Listening position is stored separately from the visual reading position; background listening does not create fake active reading statistics. Current text appears in the audio panel, rather than highlighting PDF text coordinates.
 
-Only installed Indonesian voices that declare no network requirement are selected; network voices are excluded. If none is installed, the panel explains how to open the phone's TTS settings. Voice quality depends on the engine/voice installed on the phone. Scanned/image-only PDFs need OCR and are reported as unsupported, rather than read as empty audio. No neural model, online speech service or INTERNET permission is added. Initial voice-data installation is managed separately by the phone's TTS engine. PDF extraction may not reconstruct complex columns/tables perfectly.
+Only installed Indonesian voices that declare no network requirement are selected; network voices are excluded. If none is installed, the panel explains how to open the phone's TTS settings. Bundled ML Kit Latin OCR now handles pages without embedded text; results are cached privately by page. Recognition runs locally without a model download, and the app still has no INTERNET permission. Voice quality follows the phone's engine; no custom neural speech model is bundled. Complex columns, poor scans, handwriting and mathematical notation may not read accurately.
 
-Version code 7; Room schema remains 2. Install over the previous signed debug build to retain books and settings.
+Version code 8; Room schema remains 2. Install over the previous signed debug build to retain books and settings. The OCR model and native libraries increase the universal debug APK to approximately 126 MiB.
 
 Spotibook adalah aplikasi Android untuk baca ebook dan mencatat kebiasaan membaca. Buku disimpan di perangkat, bisa dikelompokkan ke rak, lalu dibaca sambil melihat progres, waktu baca, dan target harian.
 
@@ -35,9 +35,9 @@ Screenshot berasal dari pengujian UI dengan data contoh. Buku pada gambar tidak 
 
 ## Download dan instal
 
-**[Download Spotibook 1.6.0 untuk Android (.apk)](https://github.com/Cirengbasii/SpotiBook/releases/download/v1.6.0-preview.1/Spotibook-1.6.0-preview.apk)** · [Lihat semua rilis](https://github.com/Cirengbasii/SpotiBook/releases)
+**[Download Spotibook 1.7.0 untuk Android (.apk)](https://github.com/Cirengbasii/SpotiBook/releases/download/v1.7.0-preview.1/Spotibook-1.7.0-preview.apk)** · [Lihat semua rilis](https://github.com/Cirengbasii/SpotiBook/releases)
 
-Versi percobaan 1.6.0 tersedia melalui link di atas, atau pilih file `.apk` dari bagian **Assets** pada halaman rilis. Pembaruan dari build dengan tanda tangan yang sama bisa dipasang langsung tanpa uninstall.
+Versi percobaan 1.7.0 tersedia melalui link di atas, atau pilih file `.apk` dari bagian **Assets** pada halaman rilis. Pembaruan dari build dengan tanda tangan yang sama bisa dipasang langsung tanpa uninstall.
 
 Minimum Android 9. APK ini adalah build debug untuk percobaan; perilaku pada HP, termasuk widget dan alarm saat layar mati, belum diuji langsung.
 

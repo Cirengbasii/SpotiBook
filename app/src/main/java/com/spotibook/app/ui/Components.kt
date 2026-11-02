@@ -105,6 +105,7 @@ fun dateLabel(epoch: Long): String = Instant.ofEpochMilli(epoch).atZone(ZoneId.s
                         Icon(icon, null, Modifier.size(27.dp), tint = if (picked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, color = if (picked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                    Box(Modifier.width(22.dp).height(3.dp).background(if(picked)MaterialTheme.colorScheme.primary else Color.Transparent,CircleShape))
                 }
             }
         }

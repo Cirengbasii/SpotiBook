@@ -2,7 +2,7 @@
 
 [Kembali ke README](../README.md)
 
-## Update 1.6.0 — Coral dan mode gelap
+## Update 1.7.0 — Beranda Coral baru dan mode gelap
 
 | Terang | Gelap |
 | --- | --- |
